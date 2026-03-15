@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The AI Exposure Atlas</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap");
+
+:root {
+  --bg-0: #04050b;
+  --bg-1: #0a1022;
+  --bg-card: #0e1529;
+  --bg-card-soft: rgba(14, 21, 41, 0.72);
+  --text: #eef2ff;
+  --text-muted: #a7b0cb;
+  --line: #26314f;
+  --line-soft: #1a223a;
+  --teal: #2dd4bf;
+  --cyan: #67e8f9;
+  --amber: #f59e0b;
+  --orange: #f97316;
+  --red: #ef4444;
+  --pink: #fb7185;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 15%, rgba(45, 212, 191, 0.12), transparent 38%),
+    radial-gradient(circle at 86% 22%, rgba(249, 115, 22, 0.11), transparent 40%),
+    radial-gradient(circle at 65% 78%, rgba(103, 232, 249, 0.08), transparent 42%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-0));
+  color: var(--text);
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.page-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 0.7px, transparent 0.7px);
+  background-size: 3px 3px;
+  opacity: 0.2;
+}
+
+.section {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 82px 24px;
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 26px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  background: rgba(3, 12, 25, 0.64);
+  color: var(--cyan);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+h1 {
+  max-width: 920px;
+  font-size: clamp(2.4rem, 7vw, 5.7rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  margin-bottom: 8px;
+}
+
+.headline-gradient {
+  background: linear-gradient(120deg, #67e8f9 0%, #fcd34d 38%, #f97316 74%, #fb7185 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  max-width: 900px;
+  font-size: clamp(1.06rem, 2.2vw, 1.38rem);
+  color: var(--text-muted);
+}
+
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.meta-card {
+  padding: 18px 18px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg-card-soft);
+  backdrop-filter: blur(6px);
+}
+
+.meta-card .k {
+  font-size: 1.65rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--cyan);
+  margin-bottom: 3px;
+}
+
+.meta-card .v {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.scroll-note {
+  margin-top: 4px;
+  color: #8994b7;
+  font-size: 0.84rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-size: clamp(1.56rem, 4vw, 2.6rem);
+  line-height: 1.15;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+  color: var(--text-muted);
+  font-size: clamp(0.97rem, 1.8vw, 1.1rem);
+  max-width: 920px;
+  margin-bottom: 28px;
+}
+
+.frame {
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(14, 21, 41, 0.8), rgba(10, 14, 28, 0.75));
+  padding: 14px;
+}
+
+.chart {
+  width: 100%;
+  min-height: 420px;
+}
+
+.chart svg {
+  width: 100%;
+  display: block;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.note-card {
+  border-radius: 14px;
+  border: 1px solid var(--line-soft);
+  background: rgba(4, 8, 19, 0.68);
+  padding: 14px;
+  height: 100%;
+}
+
+.note-card h3 {
+  font-size: 0.85rem;
+  color: var(--cyan);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.note-card p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.metric-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 0.86rem;
+}
+
+.metric-line span:first-child {
+  color: #8e98b8;
+}
+
+.metric-line span:last-child {
+  color: #e8ecff;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.leaderboard {
+  margin-top: 14px;
+  max-height: 440px;
+  overflow: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+}
+
+.leaderboard .row {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 58px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.84rem;
+}
+
+.leaderboard .row:first-child {
+  border-top: none;
+}
+
+.leaderboard .rank {
+  color: #8f9cc2;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.leaderboard .title {
+  color: #eef2ff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaderboard .val {
+  text-align: right;
+  color: #fcd34d;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.paradox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.paradox-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(12, 18, 34, 0.78);
+}
+
+.paradox-card .label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  color: #9ca8cb;
+  margin-bottom: 6px;
+}
+
+.paradox-card .value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffd27a;
+}
+
+.paradox-card .detail {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.footer {
+  border-top: 1px solid var(--line);
+  margin-top: 40px;
+  padding: 40px 24px 50px;
+  text-align: center;
+  color: #8f99b6;
+  font-size: 0.82rem;
+}
+
+.tooltip {
+  position: fixed;
+  pointer-events: none;
+  opacity: 0;
+  max-width: 330px;
+  border-radius: 10px;
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  background: rgba(4, 8, 19, 0.95);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  color: #ebf2ff;
+  font-size: 0.81rem;
+  z-index: 50;
+  padding: 10px 11px;
+  transition: opacity 0.12s ease;
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
+.tooltip .tt-title {
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.tooltip .tt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.mono {
+  font-family: "IBM Plex Mono", monospace;
+}
+
+@media (max-width: 980px) {
+  .two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .section {
+    padding: 66px 16px;
+  }
+
+  .chart {
+    min-height: 360px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="page-noise"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<section class="section hero visible">
+  <div class="eyebrow">Multi-source labor analysis</div>
+  <h1>
+    The AI Exposure Atlas:
+    <span class="headline-gradient">where forecasts collide with deployment reality</span>
+  </h1>
+  <p class="subtitle">
+    342 occupations, four independent frameworks, one joined dataset. This page visualizes confrontations between theoretical AI capability,
+    observed usage, and pre-LLM automation baselines.
+  </p>
+  <div class="hero-meta" id="hero-metrics"></div>
+  <p class="scroll-note">Scroll to explore source-by-source disagreement</p>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Pre-LLM vs LLM Inversion</h2>
+  <p class="section-subtitle">
+    Frey and Osborne captured a robotics-era view of automation. Karpathy captures LLM-era cognitive exposure. The diagonal is equality;
+    points below it are occupations that looked automatable in 2013 but less exposed to current LLM workflows.
+  </p>
+  <div class="two-col">
+    <div class="frame">
+      <div class="chart" id="inversion-chart"></div>
+    </div>
+    <aside class="note-card">
+      <h3>Inversion Notes</h3>
+      <p id="inversion-summary"></p>
+      <div id="inversion-metrics"></div>
+      <div class="leaderboard" id="inversion-list"></div>
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Theory-Reality Gap</h2>
+  <p class="section-subtitle">
+    OpenAI beta estimates potential task-time reduction. Anthropic observed exposure tracks real deployment. Distance below the diagonal is the
+    adoption ceiling.
+  </p>
+  <div class="two-col">
+    <div class="frame">
+      <div class="chart" id="gap-chart"></div>
+    </div>
+    <aside class="note-card">
+      <h3>Largest Gaps</h3>
+      <p id="gap-summary"></p>
+      <div class="leaderboard" id="gap-list"></div>
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Consensus vs Disagreement</h2>
+  <p class="section-subtitle">
+    Consensus is average score across available LLM-era sources; disagreement is max minus min. High consensus + low disagreement are robust
+    signals. High disagreement flags methodological blindspots.
+  </p>
+  <div class="two-col">
+    <div class="frame">
+      <div class="chart" id="consensus-chart"></div>
+    </div>
+    <aside class="note-card">
+      <h3>Disagreement Leaders</h3>
+      <p id="disagreement-summary"></p>
+      <div class="leaderboard" id="disagreement-list"></div>
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">LLM Disruption Delta Occupations</h2>
+  <p class="section-subtitle">
+    Occupations where Frey and Osborne rated low risk (`<0.3`) but Karpathy rates high (`>=0.7`). This isolates jobs newly exposed by LLMs.
+  </p>
+  <div class="frame">
+    <div class="chart" id="delta-chart"></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Category-Level Confrontation Map</h2>
+  <p class="section-subtitle">
+    Workforce-weighted category averages by source. This highlights where all sources align (or conflict) at sector scale.
+  </p>
+  <div class="frame">
+    <div class="chart" id="category-chart"></div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Researcher Paradox Dashboard</h2>
+  <p class="section-subtitle">
+    Developer-class work is both highly exposed and highly rewarded. The same labor segment appears central to automation and to economic demand.
+  </p>
+  <div class="frame">
+    <div class="paradox-grid" id="paradox-cards"></div>
+    <div class="chart" id="paradox-chart"></div>
+  </div>
+</section>
+
+<footer class="footer">
+  Built from <span class="mono">unified_exposure.csv</span> using D3.js v7. Sources: Karpathy /jobs fork, OpenAI GPTs-are-GPTs,
+  Anthropic Economic Index, Frey and Osborne.
+</footer>
+
+<script>
+const tooltip = document.getElementById("tooltip");
+let DATA = [];
+
+function n(v) {
+  const x = +v;
+  return Number.isFinite(x) ? x : NaN;
+}
+
+function valid(v) {
+  return Number.isFinite(v);
+}
+
+function fmtNum(v) {
+  if (!valid(v)) return "NA";
+  if (v >= 1e12) return (v / 1e12).toFixed(1) + "T";
+  if (v >= 1e9) return (v / 1e9).toFixed(1) + "B";
+  if (v >= 1e6) return (v / 1e6).toFixed(1) + "M";
+  if (v >= 1e3) return (v / 1e3).toFixed(1) + "K";
+  return Math.round(v).toLocaleString();
+}
+
+function fmtPct(v) {
+  return valid(v) ? (v * 100).toFixed(1) + "%" : "NA";
+}
+
+function fmtScore(v) {
+  return valid(v) ? v.toFixed(3) : "NA";
+}
+
+function prettyCategory(s) {
+  return s
+    .replace(/-/g, " ")
+    .replace(/\band\b/g, "&")
+    .replace(/\b\w/g, (m) => m.toUpperCase());
+}
+
+function shortTitle(t, max = 36) {
+  return t.length > max ? t.slice(0, max - 3) + "..." : t;
+}
+
+function avg(arr) {
+  if (!arr.length) return NaN;
+  return d3.sum(arr) / arr.length;
+}
+
+function pearson(xs, ys) {
+  const nPts = Math.min(xs.length, ys.length);
+  if (nPts < 3) return NaN;
+  const mx = avg(xs);
+  const my = avg(ys);
+  let num = 0;
+  let denX = 0;
+  let denY = 0;
+  for (let i = 0; i < nPts; i += 1) {
+    const dx = xs[i] - mx;
+    const dy = ys[i] - my;
+    num += dx * dy;
+    denX += dx * dx;
+    denY += dy * dy;
+  }
+  const den = Math.sqrt(denX * denY);
+  return den === 0 ? NaN : num / den;
+}
+
+function showTip(evt, html) {
+  tooltip.innerHTML = html;
+  tooltip.classList.add("show");
+  moveTip(evt);
+}
+
+function moveTip(evt) {
+  const tw = tooltip.offsetWidth;
+  const th = tooltip.offsetHeight;
+  let x = evt.clientX + 14;
+  let y = evt.clientY + 14;
+  if (x + tw > window.innerWidth - 10) x = evt.clientX - tw - 14;
+  if (y + th > window.innerHeight - 10) y = evt.clientY - th - 14;
+  tooltip.style.left = x + "px";
+  tooltip.style.top = y + "px";
+}
+
+function hideTip() {
+  tooltip.classList.remove("show");
+}
+
+function clearContainer(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = "";
+}
+
+function buildHeroMetrics(data) {
+  const el = document.getElementById("hero-metrics");
+  el.innerHTML = "";
+
+  const totalJobs = d3.sum(data, (d) => d.jobs);
+  const highRiskJobs = d3.sum(data.filter((d) => d.exposure >= 7), (d) => d.jobs);
+  const fourSource = data.filter((d) => valid(d.karpathy) && valid(d.openai) && valid(d.anthropic) && valid(d.frey)).length;
+  const flips = data.filter((d) => valid(d.frey) && valid(d.karpathy) && d.frey < 0.3 && d.karpathy >= 0.7).length;
+
+  const cards = [
+    { k: fmtNum(totalJobs), v: "Workers represented" },
+    { k: data.length.toLocaleString(), v: "Occupations in base dataset" },
+    { k: fmtNum(highRiskJobs), v: "Workers in Karpathy 7+ exposure occupations" },
+    { k: fourSource.toString(), v: "Occupations matched across all four sources" },
+    { k: flips.toString(), v: "LLM disruption delta occupations" }
+  ];
+
+  cards.forEach((d) => {
+    const card = document.createElement("div");
+    card.className = "meta-card";
+    card.innerHTML = `<div class="k">${d.k}</div><div class="v">${d.v}</div>`;
+    el.appendChild(card);
+  });
+}
+
+function buildInversion(data) {
+  const rows = data.filter((d) => valid(d.karpathy) && valid(d.frey));
+  const container = document.getElementById("inversion-chart");
+  const W = Math.min(container.clientWidth, 920);
+  const H = 520;
+  const m = { top: 36, right: 26, bottom: 54, left: 62 };
+
+  const svg = d3.select(container).append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+  const x = d3.scaleLinear().domain([0, 1]).range([m.left, W - m.right]);
+  const y = d3.scaleLinear().domain([0, 1]).range([H - m.bottom, m.top]);
+  const r = d3.scaleSqrt().domain([0, d3.max(rows, (d) => d.jobs)]).range([2.5, 26]);
+  const color = d3.scaleDiverging([-0.45, 0, 0.9], d3.interpolateRdYlBu);
+
+  svg.append("line")
+    .attr("x1", x(0)).attr("x2", x(1))
+    .attr("y1", y(0)).attr("y2", y(1))
+    .attr("stroke", "#7483a9")
+    .attr("stroke-dasharray", "6,5")
+    .attr("stroke-width", 1.4)
+    .attr("opacity", 0.8);
+
+  svg.append("text")
+    .attr("x", x(0.98))
+    .attr("y", y(0.98) - 7)
+    .attr("fill", "#8390b3")
+    .attr("font-size", 11)
+    .attr("text-anchor", "end")
+    .text("equal risk line");
+
+  svg.append("g")
+    .attr("transform", `translate(0,${H - m.bottom})`)
+    .call(d3.axisBottom(x).ticks(6))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.append("g")
+    .attr("transform", `translate(${m.left},0)`)
+    .call(d3.axisLeft(y).ticks(6))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.append("text")
+    .attr("x", W / 2)
+    .attr("y", H - 12)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#9ba7c8")
+    .attr("font-size", 12)
+    .text("Frey and Osborne probability (2013 baseline)");
+
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -H / 2)
+    .attr("y", 18)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#9ba7c8")
+    .attr("font-size", 12)
+    .text("Karpathy normalized exposure (LLM era)");
+
+  svg.append("g")
+    .selectAll("circle")
+    .data(rows)
+    .join("circle")
+    .attr("cx", (d) => x(d.frey))
+    .attr("cy", (d) => y(d.karpathy))
+    .attr("r", (d) => r(d.jobs))
+    .attr("fill", (d) => color(d.llmShift || 0))
+    .attr("stroke", "rgba(255,255,255,0.16)")
+    .attr("stroke-width", 0.5)
+    .attr("opacity", 0.78)
+    .on("mouseenter", function(evt, d) {
+      d3.select(this).attr("opacity", 1).attr("stroke", "#ffffff").attr("stroke-width", 1.5);
+      showTip(evt, `
+        <div class="tt-title">${d.title}</div>
+        <div class="tt-row"><span>Frey 2013</span><span class="mono">${fmtScore(d.frey)}</span></div>
+        <div class="tt-row"><span>Karpathy</span><span class="mono">${fmtScore(d.karpathy)}</span></div>
+        <div class="tt-row"><span>LLM shift</span><span class="mono">${fmtScore(d.llmShift)}</span></div>
+        <div class="tt-row"><span>Workers</span><span class="mono">${fmtNum(d.jobs)}</span></div>
+      `);
+    })
+    .on("mousemove", moveTip)
+    .on("mouseleave", function() {
+      d3.select(this).attr("opacity", 0.78).attr("stroke", "rgba(255,255,255,0.16)").attr("stroke-width", 0.5);
+      hideTip();
+    });
+
+  const corr = pearson(rows.map((d) => d.frey), rows.map((d) => d.karpathy));
+  const invertedMass = d3.sum(rows.filter((d) => d.frey >= 0.6 && d.karpathy <= 0.4), (d) => d.jobs);
+  const llmDeltaCount = rows.filter((d) => d.frey < 0.3 && d.karpathy >= 0.7).length;
+
+  document.getElementById("inversion-summary").textContent =
+    `Pearson correlation is ${corr.toFixed(3)} across ${rows.length} matched occupations. The pre-LLM baseline is not just weak in the LLM era; it often reverses.`;
+
+  document.getElementById("inversion-metrics").innerHTML = `
+    <div class="metric-line"><span>Matched rows</span><span>${rows.length}</span></div>
+    <div class="metric-line"><span>Pearson correlation</span><span>${corr.toFixed(3)}</span></div>
+    <div class="metric-line"><span>Frey high (>=0.6) and Karpathy low (<=0.4)</span><span>${fmtNum(invertedMass)} workers</span></div>
+    <div class="metric-line"><span>LLM disruption delta count</span><span>${llmDeltaCount}</span></div>
+  `;
+
+  const topShift = rows.slice().sort((a, b) => (b.llmShift || -9) - (a.llmShift || -9)).slice(0, 12);
+  const list = document.getElementById("inversion-list");
+  list.innerHTML = "";
+  topShift.forEach((d, i) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
+      <div class="rank">${String(i + 1).padStart(2, "0")}</div>
+      <div class="title">${d.title}</div>
+      <div class="val">${d.llmShift.toFixed(3)}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function buildGap(data) {
+  const rows = data.filter((d) => valid(d.openai) && valid(d.anthropic));
+  const container = document.getElementById("gap-chart");
+  const W = Math.min(container.clientWidth, 920);
+  const H = 520;
+  const m = { top: 36, right: 26, bottom: 54, left: 62 };
+
+  const svg = d3.select(container).append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+  const x = d3.scaleLinear().domain([0, 1]).range([m.left, W - m.right]);
+  const y = d3.scaleLinear().domain([0, 1]).range([H - m.bottom, m.top]);
+  const r = d3.scaleSqrt().domain([0, d3.max(rows, (d) => d.jobs)]).range([2.5, 24]);
+  const color = d3.scaleSequential().domain([0, d3.max(rows, (d) => d.theoryGap)]).interpolator(d3.interpolateYlOrRd);
+
+  svg.append("line")
+    .attr("x1", x(0)).attr("x2", x(1))
+    .attr("y1", y(0)).attr("y2", y(1))
+    .attr("stroke", "#7483a9")
+    .attr("stroke-dasharray", "6,5")
+    .attr("stroke-width", 1.4)
+    .attr("opacity", 0.85);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${H - m.bottom})`)
+    .call(d3.axisBottom(x).ticks(6))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.append("g")
+    .attr("transform", `translate(${m.left},0)`)
+    .call(d3.axisLeft(y).ticks(6))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.append("text")
+    .attr("x", W / 2)
+    .attr("y", H - 12)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#9ba7c8")
+    .attr("font-size", 12)
+    .text("OpenAI beta (theoretical capability)");
+
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -H / 2)
+    .attr("y", 18)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#9ba7c8")
+    .attr("font-size", 12)
+    .text("Anthropic observed exposure (deployment)");
+
+  svg.append("g")
+    .selectAll("circle")
+    .data(rows)
+    .join("circle")
+    .attr("cx", (d) => x(d.openai))
+    .attr("cy", (d) => y(d.anthropic))
+    .attr("r", (d) => r(d.jobs))
+    .attr("fill", (d) => color(d.theoryGap || 0))
+    .attr("stroke", "rgba(255,255,255,0.16)")
+    .attr("stroke-width", 0.5)
+    .attr("opacity", 0.82)
+    .on("mouseenter", function(evt, d) {
+      d3.select(this).attr("opacity", 1).attr("stroke", "#ffffff").attr("stroke-width", 1.5);
+      showTip(evt, `
+        <div class="tt-title">${d.title}</div>
+        <div class="tt-row"><span>OpenAI beta</span><span class="mono">${fmtScore(d.openai)}</span></div>
+        <div class="tt-row"><span>Anthropic observed</span><span class="mono">${fmtScore(d.anthropic)}</span></div>
+        <div class="tt-row"><span>Theory-reality gap</span><span class="mono">${fmtScore(d.theoryGap)}</span></div>
+        <div class="tt-row"><span>Workers</span><span class="mono">${fmtNum(d.jobs)}</span></div>
+      `);
+    })
+    .on("mousemove", moveTip)
+    .on("mouseleave", function() {
+      d3.select(this).attr("opacity", 0.82).attr("stroke", "rgba(255,255,255,0.16)").attr("stroke-width", 0.5);
+      hideTip();
+    });
+
+  const meanGap = avg(rows.map((d) => d.theoryGap));
+  const medianGap = d3.median(rows, (d) => d.theoryGap);
+  const pctPos = rows.filter((d) => d.theoryGap > 0).length / rows.length;
+  document.getElementById("gap-summary").textContent =
+    `Mean gap ${meanGap.toFixed(3)}, median ${medianGap.toFixed(3)}, with ${fmtPct(pctPos)} of occupations above zero.`;
+
+  const list = document.getElementById("gap-list");
+  list.innerHTML = "";
+  rows.slice().sort((a, b) => b.theoryGap - a.theoryGap).slice(0, 12).forEach((d, i) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
+      <div class="rank">${String(i + 1).padStart(2, "0")}</div>
+      <div class="title">${d.title}</div>
+      <div class="val">${d.theoryGap.toFixed(3)}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function buildConsensus(data) {
+  const rows = data.filter((d) => valid(d.consensus) && valid(d.disagreement));
+  const container = document.getElementById("consensus-chart");
+  const W = Math.min(container.clientWidth, 920);
+  const H = 520;
+  const m = { top: 36, right: 28, bottom: 54, left: 62 };
+
+  const svg = d3.select(container).append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+  const x = d3.scaleLinear().domain([0, 1]).range([m.left, W - m.right]);
+  const y = d3.scaleLinear().domain([0, d3.max(rows, (d) => d.disagreement) * 1.06]).range([H - m.bottom, m.top]);
+  const r = d3.scaleSqrt().domain([0, d3.max(rows, (d) => d.jobs)]).range([2.5, 26]);
+  const color = d3.scaleOrdinal()
+    .domain([1, 2, 3])
+    .range(["#7dd3fc", "#fbbf24", "#fb7185"]);
+
+  const mx = d3.median(rows, (d) => d.consensus);
+  const my = d3.median(rows, (d) => d.disagreement);
+
+  svg.append("line")
+    .attr("x1", x(mx)).attr("x2", x(mx))
+    .attr("y1", y(0)).attr("y2", y.range()[1])
+    .attr("stroke", "#3e4d77")
+    .attr("stroke-dasharray", "5,5")
+    .attr("opacity", 0.75);
+
+  svg.append("line")
+    .attr("x1", x(0)).attr("x2", x(1))
+    .attr("y1", y(my)).attr("y2", y(my))
+    .attr("stroke", "#3e4d77")
+    .attr("stroke-dasharray", "5,5")
+    .attr("opacity", 0.75);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${H - m.bottom})`)
+    .call(d3.axisBottom(x).ticks(6))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.append("g")
+    .attr("transform", `translate(${m.left},0)`)
+    .call(d3.axisLeft(y).ticks(6))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.append("text")
+    .attr("x", W / 2)
+    .attr("y", H - 12)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#9ba7c8")
+    .attr("font-size", 12)
+    .text("Consensus score (Karpathy, OpenAI, Anthropic)");
+
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -H / 2)
+    .attr("y", 18)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#9ba7c8")
+    .attr("font-size", 12)
+    .text("Disagreement (max minus min)");
+
+  svg.append("g")
+    .selectAll("circle")
+    .data(rows)
+    .join("circle")
+    .attr("cx", (d) => x(d.consensus))
+    .attr("cy", (d) => y(d.disagreement))
+    .attr("r", (d) => r(d.jobs))
+    .attr("fill", (d) => color(d.nSources || 1))
+    .attr("stroke", "rgba(255,255,255,0.16)")
+    .attr("stroke-width", 0.5)
+    .attr("opacity", 0.8)
+    .on("mouseenter", function(evt, d) {
+      d3.select(this).attr("opacity", 1).attr("stroke", "#ffffff").attr("stroke-width", 1.5);
+      showTip(evt, `
+        <div class="tt-title">${d.title}</div>
+        <div class="tt-row"><span>Consensus</span><span class="mono">${fmtScore(d.consensus)}</span></div>
+        <div class="tt-row"><span>Disagreement</span><span class="mono">${fmtScore(d.disagreement)}</span></div>
+        <div class="tt-row"><span>Sources used</span><span class="mono">${d.nSources}</span></div>
+        <div class="tt-row"><span>Workers</span><span class="mono">${fmtNum(d.jobs)}</span></div>
+      `);
+    })
+    .on("mousemove", moveTip)
+    .on("mouseleave", function() {
+      d3.select(this).attr("opacity", 0.8).attr("stroke", "rgba(255,255,255,0.16)").attr("stroke-width", 0.5);
+      hideTip();
+    });
+
+  document.getElementById("disagreement-summary").textContent =
+    `Median consensus is ${mx.toFixed(3)} and median disagreement is ${my.toFixed(3)}. High-right outliers are high-exposure occupations with source conflict.`;
+
+  const list = document.getElementById("disagreement-list");
+  list.innerHTML = "";
+  rows.slice().sort((a, b) => b.disagreement - a.disagreement).slice(0, 12).forEach((d, i) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
+      <div class="rank">${String(i + 1).padStart(2, "0")}</div>
+      <div class="title">${d.title}</div>
+      <div class="val">${d.disagreement.toFixed(3)}</div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function buildDelta(data) {
+  const rows = data
+    .filter((d) => valid(d.frey) && valid(d.karpathy) && d.frey < 0.3 && d.karpathy >= 0.7)
+    .sort((a, b) => b.llmShift - a.llmShift)
+    .slice(0, 22);
+
+  const container = document.getElementById("delta-chart");
+  const W = Math.min(container.clientWidth, 1160);
+  const m = { top: 26, right: 70, bottom: 44, left: 270 };
+  const H = rows.length * 23 + m.top + m.bottom;
+
+  const svg = d3.select(container).append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+  const x = d3.scaleLinear().domain([0, 1]).range([m.left, W - m.right]);
+  const y = d3.scaleBand().domain(rows.map((d) => d.title)).range([m.top, H - m.bottom]).padding(0.38);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${H - m.bottom})`)
+    .call(d3.axisBottom(x).ticks(6))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.append("g")
+    .selectAll("text")
+    .data(rows)
+    .join("text")
+    .attr("x", m.left - 8)
+    .attr("y", (d) => y(d.title) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", "end")
+    .attr("fill", "#dce4ff")
+    .attr("font-size", 10.5)
+    .text((d) => shortTitle(d.title, 40));
+
+  const groups = svg.append("g").selectAll("g").data(rows).join("g");
+
+  groups.append("line")
+    .attr("x1", (d) => x(d.frey))
+    .attr("x2", (d) => x(d.karpathy))
+    .attr("y1", (d) => y(d.title) + y.bandwidth() / 2)
+    .attr("y2", (d) => y(d.title) + y.bandwidth() / 2)
+    .attr("stroke", "#7c8ebf")
+    .attr("stroke-width", 2.4)
+    .attr("opacity", 0.9);
+
+  groups.append("circle")
+    .attr("cx", (d) => x(d.frey))
+    .attr("cy", (d) => y(d.title) + y.bandwidth() / 2)
+    .attr("r", 4.3)
+    .attr("fill", "#67e8f9")
+    .attr("opacity", 0.95);
+
+  groups.append("circle")
+    .attr("cx", (d) => x(d.karpathy))
+    .attr("cy", (d) => y(d.title) + y.bandwidth() / 2)
+    .attr("r", 4.8)
+    .attr("fill", "#fb7185")
+    .attr("opacity", 0.95)
+    .on("mouseenter", function(evt, d) {
+      d3.select(this).attr("r", 6.6);
+      showTip(evt, `
+        <div class="tt-title">${d.title}</div>
+        <div class="tt-row"><span>Frey</span><span class="mono">${fmtScore(d.frey)}</span></div>
+        <div class="tt-row"><span>Karpathy</span><span class="mono">${fmtScore(d.karpathy)}</span></div>
+        <div class="tt-row"><span>LLM shift</span><span class="mono">${fmtScore(d.llmShift)}</span></div>
+        <div class="tt-row"><span>Workers</span><span class="mono">${fmtNum(d.jobs)}</span></div>
+      `);
+    })
+    .on("mousemove", moveTip)
+    .on("mouseleave", function() {
+      d3.select(this).attr("r", 4.8);
+      hideTip();
+    });
+
+  svg.append("text")
+    .attr("x", x(0.03))
+    .attr("y", m.top - 8)
+    .attr("fill", "#67e8f9")
+    .attr("font-size", 11)
+    .text("Frey and Osborne");
+
+  svg.append("text")
+    .attr("x", x(0.88))
+    .attr("y", m.top - 8)
+    .attr("fill", "#fb7185")
+    .attr("font-size", 11)
+    .attr("text-anchor", "end")
+    .text("Karpathy LLM exposure");
+}
+
+function buildCategory(data) {
+  const sources = [
+    { key: "karpathy", label: "Karpathy" },
+    { key: "openai", label: "OpenAI" },
+    { key: "anthropic", label: "Anthropic" },
+    { key: "frey", label: "Frey" }
+  ];
+
+  const grouped = d3.group(data, (d) => d.category);
+  const rows = Array.from(grouped, ([category, vals]) => {
+    const item = { category };
+    sources.forEach((s) => {
+      const v = vals.filter((d) => valid(d[s.key]) && valid(d.jobs) && d.jobs > 0);
+      item[s.key] = v.length ? d3.sum(v, (d) => d[s.key] * d.jobs) / d3.sum(v, (d) => d.jobs) : NaN;
+    });
+    return item;
+  }).sort((a, b) => b.karpathy - a.karpathy);
+
+  const container = document.getElementById("category-chart");
+  const W = Math.min(container.clientWidth, 1160);
+  const rowH = 30;
+  const m = { top: 58, right: 16, bottom: 24, left: 300 };
+  const H = rows.length * rowH + m.top + m.bottom;
+
+  const svg = d3.select(container).append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+  const x = d3.scaleBand().domain(sources.map((s) => s.key)).range([m.left, W - m.right]).padding(0.08);
+  const y = d3.scaleBand().domain(rows.map((d) => d.category)).range([m.top, H - m.bottom]).padding(0.14);
+  const color = d3.scaleLinear().domain([0, 0.5, 1]).range(["#1f7a68", "#f59e0b", "#ef4444"]);
+
+  svg.selectAll(".cat-label")
+    .data(rows)
+    .join("text")
+    .attr("x", m.left - 10)
+    .attr("y", (d) => y(d.category) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", "end")
+    .attr("fill", "#dce4ff")
+    .attr("font-size", 10.7)
+    .text((d) => prettyCategory(d.category));
+
+  svg.selectAll(".source-label")
+    .data(sources)
+    .join("text")
+    .attr("x", (d) => x(d.key) + x.bandwidth() / 2)
+    .attr("y", m.top - 18)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#9ba7c8")
+    .attr("font-size", 11)
+    .text((d) => d.label);
+
+  const cells = [];
+  rows.forEach((row) => {
+    sources.forEach((src) => {
+      cells.push({ category: row.category, source: src.key, label: src.label, value: row[src.key] });
+    });
+  });
+
+  svg.append("g")
+    .selectAll("rect")
+    .data(cells)
+    .join("rect")
+    .attr("x", (d) => x(d.source))
+    .attr("y", (d) => y(d.category))
+    .attr("width", x.bandwidth())
+    .attr("height", y.bandwidth())
+    .attr("rx", 5)
+    .attr("fill", (d) => valid(d.value) ? color(d.value) : "#151d30")
+    .attr("stroke", "rgba(255,255,255,0.08)")
+    .on("mouseenter", function(evt, d) {
+      d3.select(this).attr("stroke", "#ffffff").attr("stroke-width", 1.2);
+      showTip(evt, `
+        <div class="tt-title">${prettyCategory(d.category)}</div>
+        <div class="tt-row"><span>Source</span><span class="mono">${d.label}</span></div>
+        <div class="tt-row"><span>Weighted score</span><span class="mono">${fmtScore(d.value)}</span></div>
+      `);
+    })
+    .on("mousemove", moveTip)
+    .on("mouseleave", function() {
+      d3.select(this).attr("stroke", "rgba(255,255,255,0.08)").attr("stroke-width", 1);
+      hideTip();
+    });
+
+  svg.append("g")
+    .selectAll("text.cell")
+    .data(cells)
+    .join("text")
+    .attr("x", (d) => x(d.source) + x.bandwidth() / 2)
+    .attr("y", (d) => y(d.category) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", "middle")
+    .attr("fill", "#0a0c14")
+    .attr("font-size", 10)
+    .attr("font-family", "IBM Plex Mono, monospace")
+    .text((d) => valid(d.value) ? d.value.toFixed(2) : "NA");
+}
+
+function buildParadox(data) {
+  const cards = document.getElementById("paradox-cards");
+  cards.innerHTML = "";
+
+  const dev = data.find((d) => d.title === "Software developers, quality assurance analysts, and testers");
+  const programmers = data.find((d) => d.title === "Computer programmers");
+  const ctech = data.filter((d) => d.category === "computer-and-information-technology");
+  const catOpenAi = avg(ctech.map((d) => d.openai).filter(valid));
+  const catAnth = avg(ctech.map((d) => d.anthropic).filter(valid));
+
+  const payload = [
+    {
+      label: "Software Developers (Karpathy)",
+      value: valid(dev?.karpathy) ? dev.karpathy.toFixed(2) : "NA",
+      detail: "Exposure from the BLS developer aggregate row"
+    },
+    {
+      label: "Developer Jobs",
+      value: valid(dev?.jobs) ? fmtNum(dev.jobs) : "NA",
+      detail: "Software developers, QA, and testers"
+    },
+    {
+      label: "Developer Median Pay",
+      value: valid(dev?.pay) ? "$" + Math.round(dev.pay).toLocaleString() : "NA",
+      detail: "Annual median pay"
+    },
+    {
+      label: "Computer Programmers (OpenAI / Anthropic)",
+      value: valid(programmers?.openai) && valid(programmers?.anthropic)
+        ? `${programmers.openai.toFixed(2)} / ${programmers.anthropic.toFixed(2)}`
+        : "NA",
+      detail: "Closest matched coding occupation across both sources"
+    },
+    {
+      label: "CS Category Mean (OpenAI / Anthropic)",
+      value: valid(catOpenAi) && valid(catAnth) ? `${catOpenAi.toFixed(2)} / ${catAnth.toFixed(2)}` : "NA",
+      detail: "Occupation-average across computer-and-information-technology"
+    }
+  ];
+
+  payload.forEach((p) => {
+    const card = document.createElement("div");
+    card.className = "paradox-card";
+    card.innerHTML = `
+      <div class="label">${p.label}</div>
+      <div class="value">${p.value}</div>
+      <div class="detail">${p.detail}</div>
+    `;
+    cards.appendChild(card);
+  });
+
+  const focusTitles = [
+    "Software developers, quality assurance analysts, and testers",
+    "Computer programmers",
+    "Data scientists",
+    "Writers and authors",
+    "Roofers"
+  ];
+
+  const rows = focusTitles
+    .map((title) => data.find((d) => d.title === title))
+    .filter(Boolean);
+
+  const container = document.getElementById("paradox-chart");
+  const W = Math.min(container.clientWidth, 1100);
+  const m = { top: 30, right: 20, bottom: 30, left: 290 };
+  const H = rows.length * 46 + m.top + m.bottom;
+
+  const svg = d3.select(container).append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+  const x = d3.scaleLinear().domain([0, 1]).range([m.left, W - m.right]);
+  const y = d3.scaleBand().domain(rows.map((d) => d.title)).range([m.top, H - m.bottom]).padding(0.3);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${H - m.bottom})`)
+    .call(d3.axisBottom(x).ticks(6))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.selectAll(".yl")
+    .data(rows)
+    .join("text")
+    .attr("x", m.left - 8)
+    .attr("y", (d) => y(d.title) + y.bandwidth() / 2)
+    .attr("dy", "0.35em")
+    .attr("text-anchor", "end")
+    .attr("fill", "#dce4ff")
+    .attr("font-size", 11)
+    .text((d) => shortTitle(d.title, 42));
+
+  const markerDefs = [
+    { key: "karpathy", color: "#fb7185", label: "Karpathy" },
+    { key: "openai", color: "#f59e0b", label: "OpenAI" },
+    { key: "anthropic", color: "#67e8f9", label: "Anthropic" }
+  ];
+
+  markerDefs.forEach((mdef, idx) => {
+    svg.append("text")
+      .attr("x", x(0.18 + idx * 0.24))
+      .attr("y", m.top - 10)
+      .attr("fill", mdef.color)
+      .attr("font-size", 11)
+      .attr("text-anchor", "middle")
+      .text(mdef.label);
+  });
+
+  rows.forEach((row) => {
+    const cy = y(row.title) + y.bandwidth() / 2;
+    markerDefs.forEach((mdef) => {
+      const val = row[mdef.key];
+      if (!valid(val)) return;
+      svg.append("circle")
+        .attr("cx", x(val))
+        .attr("cy", cy)
+        .attr("r", 5.3)
+        .attr("fill", mdef.color)
+        .on("mouseenter", (evt) => {
+          showTip(evt, `
+            <div class="tt-title">${row.title}</div>
+            <div class="tt-row"><span>${mdef.label}</span><span class="mono">${fmtScore(val)}</span></div>
+            <div class="tt-row"><span>Workers</span><span class="mono">${fmtNum(row.jobs)}</span></div>
+            <div class="tt-row"><span>Median pay</span><span class="mono">${valid(row.pay) ? "$" + Math.round(row.pay).toLocaleString() : "NA"}</span></div>
+          `);
+        })
+        .on("mousemove", moveTip)
+        .on("mouseleave", hideTip);
+    });
+  });
+}
+
+function renderAll() {
+  [
+    "inversion-chart",
+    "gap-chart",
+    "consensus-chart",
+    "delta-chart",
+    "category-chart",
+    "paradox-chart",
+    "inversion-list",
+    "gap-list",
+    "disagreement-list",
+    "paradox-cards"
+  ].forEach(clearContainer);
+
+  if (!DATA.length) return;
+  buildHeroMetrics(DATA);
+  buildInversion(DATA);
+  buildGap(DATA);
+  buildConsensus(DATA);
+  buildDelta(DATA);
+  buildCategory(DATA);
+  buildParadox(DATA);
+}
+
+let resizeTimer = null;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderAll, 180);
+});
+
+const sectionObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) entry.target.classList.add("visible");
+    });
+  },
+  { threshold: 0.15 }
+);
+document.querySelectorAll(".section").forEach((s) => sectionObserver.observe(s));
+
+d3.csv("unified_exposure.csv", (d) => ({
+  title: d.title,
+  category: d.category,
+  soc: d.soc,
+  pay: n(d.median_pay_annual),
+  jobs: n(d.num_jobs_2024),
+  education: d.entry_education,
+  exposure: n(d.exposure),
+  rationale: d.exposure_rationale,
+  karpathy: n(d.karpathy_normalized),
+  openai: n(d.openai_beta),
+  anthropic: n(d.anthropic_observed),
+  frey: n(d.frey_osborne_prob),
+  theoryGap: n(d.theory_reality_gap),
+  llmShift: n(d.llm_shift),
+  consensus: n(d.consensus_score),
+  nSources: n(d.n_sources),
+  disagreement: n(d.disagreement)
+})).then((rows) => {
+  DATA = rows.filter((d) => valid(d.jobs) && d.jobs > 0);
+  renderAll();
+}).catch((err) => {
+  const hero = document.querySelector(".hero");
+  hero.insertAdjacentHTML("beforeend", `<p style="color:#fb7185">Failed to load unified_exposure.csv: ${err}</p>`);
+});
+</script>
+</body>
+</html>
