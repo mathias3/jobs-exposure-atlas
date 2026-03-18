@@ -4,6 +4,44 @@ Cross-referenced AI exposure data for **342 U.S. occupations** and **143,066,500
 
 This repository is not just another AI-jobs chart. The core contribution is a single occupation-level table where Karpathy `/jobs`, OpenAI "GPTs are GPTs", Anthropic observed deployment, and Frey & Osborne can be analyzed side-by-side with consistent SOC normalization.
 
+## Explore The Interactive Atlas
+
+**→ [Open the interactive version](https://mathias3.github.io/jobs-exposure-atlas/)** for the full occupation explorer, multi-chart atlas, and source-by-source drilldown. The site is published from this repository so people can use it directly without downloading the repo first.
+
+## The Current Picture
+
+### Workforce Exposure Frontier
+
+Which occupations combine high exposure with labor-market scale?
+
+![Workforce exposure frontier](assets/charts/workforce_frontier.png)
+
+*Large bubbles combine millions of workers with elevated multi-source exposure. Color shows disagreement across frameworks; size tracks pay.*
+
+### Theory vs Deployment Gap Leaders
+
+Where theoretical capability is running far ahead of observed deployment:
+
+![Theory vs deployment gap leaders](assets/charts/theory_reality_gap.png)
+
+*OpenAI's theoretical exposure and Anthropic's observed exposure are plotted together as a dumbbell view so the adoption gap is visible occupation by occupation.*
+
+### LLM Disruption Delta Occupations
+
+Where the LLM era breaks hardest from older automation assumptions:
+
+![LLM disruption delta occupations](assets/charts/llm_shift.png)
+
+*These occupations were relatively low-risk in Frey & Osborne's pre-LLM framework but jump sharply in Karpathy's LLM-era exposure scores.*
+
+### Category-Level Confrontation Map
+
+Where the four frameworks align, and where they split by occupation family:
+
+![Category confrontation map](assets/charts/category_confrontation.png)
+
+*Employment-weighted category averages make it easy to compare Karpathy, OpenAI, Anthropic, and Frey & Osborne on one consistent grid.*
+
 ## Why This Project Exists
 
 Most AI labor market claims compare studies informally, because each source uses different units and assumptions:
@@ -102,16 +140,19 @@ These are the core analytical confrontations the repository is built for:
 ## Repository Structure
 
 1. [build_unified.py](./build_unified.py): deterministic data integration script.
-2. [unified_exposure.csv](./unified_exposure.csv): final merged dataset.
-3. [index.html](./index.html): single-file D3.js interactive (multi-source atlas).
-4. Source data files: [occupations.csv](./occupations.csv), [data.json](./data.json), [scores.json](./scores.json), [openai_gpts.csv](./openai_gpts.csv), [anthropic_exposure.csv](./anthropic_exposure.csv), [anthropic_tasks.csv](./anthropic_tasks.csv), [frey_osborne.csv](./frey_osborne.csv).
-5. Research notes: [reserach/](./reserach/).
+2. [build_readme_charts.py](./build_readme_charts.py): generates static chart snapshots used in this README.
+3. [unified_exposure.csv](./unified_exposure.csv): final merged dataset.
+4. [index.html](./index.html): single-file D3.js interactive (multi-source atlas).
+5. [assets/charts/](./assets/charts/): README-ready chart snapshots.
+6. Source data files: [occupations.csv](./occupations.csv), [data.json](./data.json), [scores.json](./scores.json), [openai_gpts.csv](./openai_gpts.csv), [anthropic_exposure.csv](./anthropic_exposure.csv), [anthropic_tasks.csv](./anthropic_tasks.csv), [frey_osborne.csv](./frey_osborne.csv).
+7. Research notes: [reserach/](./reserach/).
 
 ## Run Locally
 
 ```bash
 python3 -m pip install -r requirements.txt
 python3 build_unified.py
+python3 build_readme_charts.py
 python3 -m http.server 8000
 # open http://localhost:8000
 ```
@@ -120,7 +161,7 @@ python3 -m http.server 8000
 
 1. This project is designed for open-source publication as an analysis artifact and data resource.
 2. If you add more external datasets, keep source-level provenance and field-level transformation notes in [build_unified.py](./build_unified.py).
-3. Before releases, regenerate [unified_exposure.csv](./unified_exposure.csv) and verify headline stats in this README.
+3. Before releases, regenerate [unified_exposure.csv](./unified_exposure.csv), rebuild [assets/charts/](./assets/charts/), and verify headline stats in this README.
 
 ## Future Integrations (Not Yet In The Unified CSV)
 

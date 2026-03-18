@@ -123,6 +123,33 @@ h1 {
   margin-top: 10px;
 }
 
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hero-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(103, 232, 249, 0.22);
+  background: rgba(4, 10, 23, 0.7);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.hero-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(103, 232, 249, 0.45);
+  background: rgba(7, 14, 30, 0.92);
+}
+
 .meta-card {
   padding: 18px 18px 16px;
   border-radius: 14px;
@@ -267,6 +294,12 @@ h1 {
   text-align: right;
   color: #fcd34d;
   font-family: "IBM Plex Mono", monospace;
+}
+
+.chart-note {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  margin-top: 12px;
 }
 
 .explorer-layout {
@@ -653,6 +686,10 @@ h1 {
     342 occupations, four independent frameworks, one joined dataset. This page visualizes confrontations between theoretical AI capability,
     observed usage, and pre-LLM automation baselines.
   </p>
+  <div class="hero-actions">
+    <a class="hero-link" href="./unified_exposure.csv">Download unified CSV</a>
+    <a class="hero-link" href="https://github.com/mathias3/jobs-exposure-atlas" target="_blank" rel="noopener noreferrer">View source repository</a>
+  </div>
   <div class="hero-meta" id="hero-metrics"></div>
   <p class="scroll-note">Scroll to explore source-by-source disagreement</p>
 </section>
@@ -706,6 +743,25 @@ h1 {
       </div>
     </div>
     <aside class="note-card detail-panel" id="explorer-detail"></aside>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Workforce Exposure Frontier</h2>
+  <p class="section-subtitle">
+    The most consequential occupations are not just highly exposed, they also employ millions of people. This view surfaces large labor pools where consensus exposure is already elevated.
+  </p>
+  <div class="two-col">
+    <div class="frame">
+      <div class="chart" id="frontier-chart"></div>
+      <p class="chart-note">X = consensus exposure, Y = occupation employment on a log scale, bubble size = median pay, color = disagreement.</p>
+    </div>
+    <aside class="note-card">
+      <h3>Frontier Notes</h3>
+      <p id="frontier-summary"></p>
+      <div id="frontier-metrics"></div>
+      <div class="leaderboard" id="frontier-list"></div>
+    </aside>
   </div>
 </section>
 
@@ -1125,6 +1181,145 @@ function buildHeroMetrics(data) {
     card.className = "meta-card";
     card.innerHTML = `<div class="k">${d.k}</div><div class="v">${d.v}</div>`;
     el.appendChild(card);
+  });
+}
+
+function buildFrontier(data) {
+  const rows = data
+    .filter((d) => valid(d.consensus) && valid(d.disagreement) && valid(d.jobs) && d.jobs > 0)
+    .filter((d) => matchedSourceCount(d) >= 3)
+    .map((d) => ({ ...d, impact: d.consensus * d.jobs }));
+
+  const container = document.getElementById("frontier-chart");
+  const W = Math.min(container.clientWidth, 920);
+  const H = 540;
+  const m = { top: 28, right: 26, bottom: 56, left: 74 };
+
+  const svg = d3.select(container).append("svg")
+    .attr("viewBox", `0 0 ${W} ${H}`)
+    .attr("preserveAspectRatio", "xMidYMid meet");
+
+  const x = d3.scaleLinear().domain([0, 1]).range([m.left, W - m.right]);
+  const y = d3.scaleLog()
+    .domain([Math.max(1e3, d3.min(rows, (d) => d.jobs) || 1e3), d3.max(rows, (d) => d.jobs) * 1.28])
+    .range([H - m.bottom, m.top]);
+  const r = d3.scaleSqrt()
+    .domain(d3.extent(rows, (d) => d.pay))
+    .range([4, 24]);
+  const color = d3.scaleSequential()
+    .domain(d3.extent(rows, (d) => d.disagreement))
+    .interpolator(d3.interpolateYlOrRd);
+
+  const yTicks = [1e3, 1e4, 1e5, 1e6, 1e7].filter((tick) => tick >= y.domain()[0] && tick <= y.domain()[1]);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${H - m.bottom})`)
+    .call(d3.axisBottom(x).ticks(6))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.append("g")
+    .attr("transform", `translate(${m.left},0)`)
+    .call(d3.axisLeft(y).tickValues(yTicks).tickFormat((v) => fmtNum(v)))
+    .call((g) => g.select(".domain").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick line").attr("stroke", "#22304d"))
+    .call((g) => g.selectAll(".tick text").attr("fill", "#9ba7c8").attr("font-size", 11));
+
+  svg.append("line")
+    .attr("x1", x(0.6)).attr("x2", x(0.6))
+    .attr("y1", y.range()[0]).attr("y2", y.range()[1])
+    .attr("stroke", "#5b6b92")
+    .attr("stroke-dasharray", "5,5")
+    .attr("opacity", 0.8);
+
+  svg.append("line")
+    .attr("x1", x.range()[0]).attr("x2", x.range()[1])
+    .attr("y1", y(1e6)).attr("y2", y(1e6))
+    .attr("stroke", "#5b6b92")
+    .attr("stroke-dasharray", "5,5")
+    .attr("opacity", 0.55);
+
+  svg.append("text")
+    .attr("x", W / 2)
+    .attr("y", H - 12)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#9ba7c8")
+    .attr("font-size", 12)
+    .text("Consensus score (Karpathy, OpenAI, Anthropic)");
+
+  svg.append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -H / 2)
+    .attr("y", 18)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#9ba7c8")
+    .attr("font-size", 12)
+    .text("Workers represented (log scale)");
+
+  svg.append("g")
+    .selectAll("circle")
+    .data(rows)
+    .join("circle")
+    .attr("cx", (d) => x(d.consensus))
+    .attr("cy", (d) => y(d.jobs))
+    .attr("r", (d) => r(d.pay || 0))
+    .attr("fill", (d) => color(d.disagreement))
+    .attr("stroke", "rgba(255,255,255,0.18)")
+    .attr("stroke-width", 0.8)
+    .attr("opacity", 0.8)
+    .on("mouseenter", function(evt, d) {
+      d3.select(this).attr("opacity", 1).attr("stroke", "#ffffff").attr("stroke-width", 1.5);
+      showTip(evt, `
+        <div class="tt-title">${d.title}</div>
+        <div class="tt-row"><span>Consensus</span><span class="mono">${fmtScore(d.consensus)}</span></div>
+        <div class="tt-row"><span>Disagreement</span><span class="mono">${fmtScore(d.disagreement)}</span></div>
+        <div class="tt-row"><span>Workers</span><span class="mono">${fmtNum(d.jobs)}</span></div>
+        <div class="tt-row"><span>Median pay</span><span class="mono">${fmtMoney(d.pay)}</span></div>
+      `);
+    })
+    .on("mousemove", moveTip)
+    .on("mouseleave", function() {
+      d3.select(this).attr("opacity", 0.8).attr("stroke", "rgba(255,255,255,0.18)").attr("stroke-width", 0.8);
+      hideTip();
+    });
+
+  const labelRows = rows.slice().sort((a, b) => b.impact - a.impact).slice(0, 8);
+  svg.append("g")
+    .selectAll("text")
+    .data(labelRows)
+    .join("text")
+    .attr("x", (d) => x(d.consensus) + r(d.pay || 0) + 5)
+    .attr("y", (d) => y(d.jobs) - 5)
+    .attr("fill", "#dfe6fb")
+    .attr("font-size", 10.5)
+    .text((d) => shortTitle(d.title, 30));
+
+  const exposedMass = d3.sum(rows.filter((d) => d.consensus >= 0.6), (d) => d.jobs);
+  const millionPlus = rows.filter((d) => d.jobs >= 1e6 && d.consensus >= 0.5).length;
+  const meanDisagreement = avg(rows.map((d) => d.disagreement));
+
+  document.getElementById("frontier-summary").textContent =
+    `Consensus exposure is already concentrated in several million-worker occupations. This is where multi-source alignment meets labor-market scale.`;
+
+  document.getElementById("frontier-metrics").innerHTML = `
+    <div class="metric-line"><span>Rows shown</span><span>${rows.length}</span></div>
+    <div class="metric-line"><span>Workers in consensus >= 0.6 occupations</span><span>${fmtNum(exposedMass)}</span></div>
+    <div class="metric-line"><span>1M+ worker occupations with consensus >= 0.5</span><span>${millionPlus}</span></div>
+    <div class="metric-line"><span>Mean disagreement</span><span>${fmtScore(meanDisagreement)}</span></div>
+  `;
+
+  const list = document.getElementById("frontier-list");
+  list.innerHTML = "";
+  rows.slice().sort((a, b) => b.impact - a.impact).slice(0, 12).forEach((d, i) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `
+      <div class="rank">${String(i + 1).padStart(2, "0")}</div>
+      <div class="title">${d.title}</div>
+      <div class="val">${fmtNum(d.jobs * d.consensus)}</div>
+    `;
+    list.appendChild(row);
   });
 }
 
@@ -1789,6 +1984,8 @@ function renderAll() {
     "explorer-summary",
     "explorer-table",
     "explorer-detail",
+    "frontier-chart",
+    "frontier-list",
     "inversion-chart",
     "gap-chart",
     "consensus-chart",
@@ -1804,6 +2001,7 @@ function renderAll() {
   if (!DATA.length) return;
   buildHeroMetrics(DATA);
   renderExplorer(DATA);
+  buildFrontier(DATA);
   buildInversion(DATA);
   buildGap(DATA);
   buildConsensus(DATA);
