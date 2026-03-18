@@ -269,6 +269,268 @@ h1 {
   font-family: "IBM Plex Mono", monospace;
 }
 
+.explorer-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
+  gap: 18px;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.control label {
+  display: block;
+  margin-bottom: 6px;
+  color: #93a0c6;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.control input,
+.control select {
+  width: 100%;
+  border: 1px solid rgba(103, 232, 249, 0.15);
+  border-radius: 10px;
+  background: rgba(5, 10, 22, 0.92);
+  color: var(--text);
+  padding: 11px 12px;
+  font: inherit;
+}
+
+.control input::placeholder {
+  color: #677493;
+}
+
+.explorer-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.summary-pill {
+  padding: 9px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(103, 232, 249, 0.15);
+  background: rgba(7, 13, 26, 0.78);
+  color: #cbd5f0;
+  font-size: 0.8rem;
+}
+
+.summary-pill strong {
+  color: #f5f7ff;
+}
+
+.explorer-table {
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(4, 8, 19, 0.54);
+}
+
+.explorer-head,
+.explorer-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) 112px 94px 88px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.explorer-head {
+  background: rgba(11, 18, 35, 0.95);
+  color: #8f9cc2;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.explorer-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+.explorer-row:hover {
+  background: rgba(103, 232, 249, 0.06);
+}
+
+.explorer-row.active {
+  background: linear-gradient(90deg, rgba(103, 232, 249, 0.1), rgba(249, 115, 22, 0.08));
+}
+
+.explorer-title {
+  min-width: 0;
+}
+
+.explorer-title strong {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #eef2ff;
+  font-size: 0.9rem;
+}
+
+.explorer-title span {
+  display: block;
+  color: #8794b5;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.explorer-metric,
+.explorer-jobs,
+.explorer-coverage {
+  text-align: right;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.82rem;
+}
+
+.explorer-metric {
+  color: #ffd27a;
+}
+
+.explorer-jobs {
+  color: #d7def7;
+}
+
+.coverage-badge {
+  display: inline-flex;
+  min-width: 44px;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.18);
+  color: #f7a7b6;
+}
+
+.detail-panel {
+  min-height: 100%;
+}
+
+.detail-kicker {
+  color: var(--cyan);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.detail-panel h3 {
+  font-size: 1.3rem;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.detail-meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 14px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.detail-stat {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(9, 15, 28, 0.78);
+  padding: 11px;
+}
+
+.detail-stat .label {
+  color: #93a0c6;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 5px;
+}
+
+.detail-stat .value {
+  color: #f4f6ff;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.score-stack {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.score-row {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr) 52px;
+  gap: 10px;
+  align-items: center;
+}
+
+.score-label {
+  color: #cbd5f0;
+  font-size: 0.82rem;
+}
+
+.score-bar {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 18, 34, 0.92);
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.score-value {
+  text-align: right;
+  color: #eef2ff;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+}
+
+.derived-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 10px;
+}
+
+.rationale {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.rationale p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+.empty-state {
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
 .paradox-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -351,12 +613,28 @@ h1 {
     grid-template-columns: 1fr;
   }
 
+  .explorer-layout {
+    grid-template-columns: 1fr;
+  }
+
   .section {
     padding: 66px 16px;
   }
 
   .chart {
     min-height: 360px;
+  }
+
+  .explorer-head,
+  .explorer-row {
+    grid-template-columns: minmax(0, 1.8fr) 92px 86px 68px;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .score-row {
+    grid-template-columns: 92px minmax(0, 1fr) 44px;
+    gap: 8px;
   }
 }
 </style>
@@ -377,6 +655,58 @@ h1 {
   </p>
   <div class="hero-meta" id="hero-metrics"></div>
   <p class="scroll-note">Scroll to explore source-by-source disagreement</p>
+</section>
+
+<section class="section">
+  <h2 class="section-title">Occupation Explorer</h2>
+  <p class="section-subtitle">
+    The joined occupation table is the core asset in this repo. Filter it, rank it by any major metric, and inspect how the four source views line up for a single job.
+  </p>
+  <div class="explorer-layout">
+    <div class="frame">
+      <div class="controls-grid">
+        <div class="control">
+          <label for="explorer-search">Search</label>
+          <input id="explorer-search" type="search" placeholder="Writers, lawyers, programmers..." />
+        </div>
+        <div class="control">
+          <label for="explorer-category">Category</label>
+          <select id="explorer-category"></select>
+        </div>
+        <div class="control">
+          <label for="explorer-coverage">Coverage</label>
+          <select id="explorer-coverage">
+            <option value="three-plus">3+ matched sources</option>
+            <option value="any">Any row</option>
+            <option value="all-four">All four sources</option>
+            <option value="llm-trio">Karpathy + OpenAI + Anthropic</option>
+          </select>
+        </div>
+        <div class="control">
+          <label for="explorer-sort">Rank By</label>
+          <select id="explorer-sort">
+            <option value="consensus">Consensus score</option>
+            <option value="disagreement">Disagreement</option>
+            <option value="theoryGap">Theory-reality gap</option>
+            <option value="llmShift">LLM shift</option>
+            <option value="jobs">Workforce size</option>
+            <option value="pay">Median pay</option>
+          </select>
+        </div>
+      </div>
+      <div class="explorer-summary" id="explorer-summary"></div>
+      <div class="explorer-table">
+        <div class="explorer-head">
+          <div>Occupation</div>
+          <div id="explorer-metric-head" style="text-align:right">Consensus</div>
+          <div style="text-align:right">Workers</div>
+          <div style="text-align:right">Sources</div>
+        </div>
+        <div id="explorer-table"></div>
+      </div>
+    </div>
+    <aside class="note-card detail-panel" id="explorer-detail"></aside>
+  </div>
 </section>
 
 <section class="section">
@@ -473,6 +803,27 @@ h1 {
 <script>
 const tooltip = document.getElementById("tooltip");
 let DATA = [];
+const SOURCE_META = [
+  { key: "karpathy", label: "Karpathy", color: "#fb7185" },
+  { key: "openai", label: "OpenAI", color: "#f59e0b" },
+  { key: "anthropic", label: "Anthropic", color: "#67e8f9" },
+  { key: "frey", label: "Frey", color: "#2dd4bf" }
+];
+const SORT_META = {
+  consensus: { label: "Consensus", accessor: (d) => d.consensus },
+  disagreement: { label: "Disagreement", accessor: (d) => d.disagreement },
+  theoryGap: { label: "Gap", accessor: (d) => d.theoryGap },
+  llmShift: { label: "LLM shift", accessor: (d) => d.llmShift },
+  jobs: { label: "Workers", accessor: (d) => d.jobs, formatter: fmtNum },
+  pay: { label: "Pay", accessor: (d) => d.pay, formatter: fmtMoney }
+};
+const explorerState = {
+  search: "",
+  category: "all",
+  coverage: "three-plus",
+  sort: "consensus",
+  selectedTitle: null
+};
 
 function n(v) {
   const x = +v;
@@ -498,6 +849,20 @@ function fmtPct(v) {
 
 function fmtScore(v) {
   return valid(v) ? v.toFixed(3) : "NA";
+}
+
+function fmtMoney(v) {
+  return valid(v) ? "$" + Math.round(v).toLocaleString() : "NA";
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[c]);
 }
 
 function prettyCategory(s) {
@@ -560,6 +925,182 @@ function clearContainer(id) {
   const el = document.getElementById(id);
   if (!el) return;
   el.innerHTML = "";
+}
+
+function matchedSourceCount(d) {
+  return SOURCE_META.filter((s) => valid(d[s.key])).length;
+}
+
+function hasCoverage(d, coverage) {
+  if (coverage === "all-four") return matchedSourceCount(d) === 4;
+  if (coverage === "llm-trio") return valid(d.karpathy) && valid(d.openai) && valid(d.anthropic);
+  if (coverage === "three-plus") return matchedSourceCount(d) >= 3;
+  return true;
+}
+
+function metricText(d, sortKey) {
+  const meta = SORT_META[sortKey];
+  const val = meta?.accessor(d);
+  if (!meta) return "NA";
+  return meta.formatter ? meta.formatter(val) : fmtScore(val);
+}
+
+function sortRows(rows, sortKey) {
+  const accessor = SORT_META[sortKey]?.accessor || SORT_META.consensus.accessor;
+  return rows.slice().sort((a, b) => {
+    const av = accessor(a);
+    const bv = accessor(b);
+    if (!valid(av) && !valid(bv)) return (b.jobs || 0) - (a.jobs || 0);
+    if (!valid(av)) return 1;
+    if (!valid(bv)) return -1;
+    if (bv !== av) return bv - av;
+    return (b.jobs || 0) - (a.jobs || 0);
+  });
+}
+
+function initExplorerControls(data) {
+  const categorySelect = document.getElementById("explorer-category");
+  if (!categorySelect.options.length) {
+    const categories = ["all", ...Array.from(new Set(data.map((d) => d.category))).sort()];
+    categorySelect.innerHTML = categories.map((category) => (
+      `<option value="${category}">${category === "all" ? "All categories" : prettyCategory(category)}</option>`
+    )).join("");
+    categorySelect.value = explorerState.category;
+  }
+
+  const bind = (id, key, eventName) => {
+    const el = document.getElementById(id);
+    if (el.dataset.bound === "true") return;
+    el.dataset.bound = "true";
+    el.addEventListener(eventName, (evt) => {
+      explorerState[key] = evt.target.value;
+      if (key !== "search") explorerState.selectedTitle = null;
+      renderExplorer(DATA);
+    });
+  };
+
+  bind("explorer-search", "search", "input");
+  bind("explorer-category", "category", "change");
+  bind("explorer-coverage", "coverage", "change");
+  bind("explorer-sort", "sort", "change");
+
+  document.getElementById("explorer-coverage").value = explorerState.coverage;
+  document.getElementById("explorer-sort").value = explorerState.sort;
+}
+
+function renderExplorer(data) {
+  initExplorerControls(data);
+  const query = explorerState.search.trim().toLowerCase();
+  const filtered = sortRows(
+    data.filter((d) => {
+      const inCategory = explorerState.category === "all" || d.category === explorerState.category;
+      const matchesQuery =
+        !query ||
+        d.title.toLowerCase().includes(query) ||
+        d.category.toLowerCase().includes(query) ||
+        (d.education || "").toLowerCase().includes(query);
+      return inCategory && matchesQuery && hasCoverage(d, explorerState.coverage);
+    }),
+    explorerState.sort
+  );
+
+  const selected = (
+    filtered.find((d) => d.title === explorerState.selectedTitle) ||
+    filtered[0] ||
+    null
+  );
+  explorerState.selectedTitle = selected?.title || null;
+
+  const metricHead = document.getElementById("explorer-metric-head");
+  metricHead.textContent = SORT_META[explorerState.sort]?.label || "Metric";
+
+  const summary = document.getElementById("explorer-summary");
+  const filteredJobs = d3.sum(filtered, (d) => d.jobs || 0);
+  const allFour = filtered.filter((d) => matchedSourceCount(d) === 4).length;
+  summary.innerHTML = [
+    `<div class="summary-pill"><strong>${filtered.length}</strong> matching occupations</div>`,
+    `<div class="summary-pill"><strong>${fmtNum(filteredJobs)}</strong> workers in current slice</div>`,
+    `<div class="summary-pill"><strong>${allFour}</strong> rows with all four sources</div>`
+  ].join("");
+
+  const table = document.getElementById("explorer-table");
+  if (!filtered.length) {
+    table.innerHTML = `<div class="empty-state">No occupations match the current filters.</div>`;
+    document.getElementById("explorer-detail").innerHTML =
+      `<div class="detail-kicker">Selected occupation</div><p class="detail-meta">Adjust the filters to inspect a joined row.</p>`;
+    return;
+  }
+
+  table.innerHTML = filtered.slice(0, 18).map((d) => `
+    <div class="explorer-row ${selected?.title === d.title ? "active" : ""}" data-title="${escapeHtml(d.title)}">
+      <div class="explorer-title">
+        <strong>${escapeHtml(d.title)}</strong>
+        <span>${escapeHtml(prettyCategory(d.category))}</span>
+      </div>
+      <div class="explorer-metric">${metricText(d, explorerState.sort)}</div>
+      <div class="explorer-jobs">${fmtNum(d.jobs)}</div>
+      <div class="explorer-coverage"><span class="coverage-badge">${matchedSourceCount(d)}/4</span></div>
+    </div>
+  `).join("");
+
+  table.querySelectorAll(".explorer-row").forEach((row) => {
+    row.addEventListener("click", () => {
+      explorerState.selectedTitle = row.dataset.title;
+      renderExplorer(DATA);
+    });
+  });
+
+  const detail = document.getElementById("explorer-detail");
+  const scoreRows = SOURCE_META.map((source) => {
+    const value = selected[source.key];
+    return `
+      <div class="score-row">
+        <div class="score-label">${source.label}</div>
+        <div class="score-bar">
+          <div class="score-fill" style="width:${valid(value) ? Math.max(0, Math.min(1, value)) * 100 : 0}%; background:${source.color}"></div>
+        </div>
+        <div class="score-value">${fmtScore(value)}</div>
+      </div>
+    `;
+  }).join("");
+
+  const derivedStats = [
+    { label: "Consensus", value: fmtScore(selected.consensus) },
+    { label: "Disagreement", value: fmtScore(selected.disagreement) },
+    { label: "Theory gap", value: fmtScore(selected.theoryGap) },
+    { label: "LLM shift", value: fmtScore(selected.llmShift) }
+  ].map((item) => `
+    <div class="detail-stat">
+      <div class="label">${item.label}</div>
+      <div class="value">${item.value}</div>
+    </div>
+  `).join("");
+
+  detail.innerHTML = `
+    <div class="detail-kicker">Selected occupation</div>
+    <h3>${escapeHtml(selected.title)}</h3>
+    <div class="detail-meta">${escapeHtml(prettyCategory(selected.category))} · ${matchedSourceCount(selected)}/4 sources matched</div>
+    <div class="detail-grid">
+      <div class="detail-stat">
+        <div class="label">Workers</div>
+        <div class="value">${fmtNum(selected.jobs)}</div>
+      </div>
+      <div class="detail-stat">
+        <div class="label">Median pay</div>
+        <div class="value">${fmtMoney(selected.pay)}</div>
+      </div>
+      <div class="detail-stat">
+        <div class="label">Entry education</div>
+        <div class="value">${escapeHtml(selected.education || "NA")}</div>
+      </div>
+    </div>
+    <div class="score-stack">${scoreRows}</div>
+    <div class="derived-grid">${derivedStats}</div>
+    <div class="rationale">
+      <div class="detail-kicker">Karpathy rationale</div>
+      <p>${escapeHtml(selected.rationale || "No rationale available for this occupation.")}</p>
+    </div>
+  `;
 }
 
 function buildHeroMetrics(data) {
@@ -1245,6 +1786,9 @@ function buildParadox(data) {
 
 function renderAll() {
   [
+    "explorer-summary",
+    "explorer-table",
+    "explorer-detail",
     "inversion-chart",
     "gap-chart",
     "consensus-chart",
@@ -1259,6 +1803,7 @@ function renderAll() {
 
   if (!DATA.length) return;
   buildHeroMetrics(DATA);
+  renderExplorer(DATA);
   buildInversion(DATA);
   buildGap(DATA);
   buildConsensus(DATA);
