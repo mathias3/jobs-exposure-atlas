@@ -93,7 +93,11 @@ def build_workforce_frontier(df: pd.DataFrame) -> None:
     rows = df[df["coverage"] >= 3].copy()
     rows = rows.dropna(subset=["num_jobs_2024", "consensus_score", "disagreement", "median_pay_annual"])
     rows["impact"] = rows["num_jobs_2024"] * rows["consensus_score"]
-    rows["bubble"] = np.sqrt(rows["median_pay_annual"].clip(lower=30_000)) / 6
+    pay_root = np.sqrt(rows["median_pay_annual"].clip(lower=30_000))
+    if np.isclose(pay_root.min(), pay_root.max()):
+        rows["bubble_area"] = 700.0
+    else:
+        rows["bubble_area"] = np.interp(pay_root, (pay_root.min(), pay_root.max()), (180, 1800))
 
     fig, ax = plt.subplots(figsize=(12.5, 8))
     norm = Normalize(rows["disagreement"].min(), rows["disagreement"].max())
@@ -102,7 +106,7 @@ def build_workforce_frontier(df: pd.DataFrame) -> None:
     scatter = ax.scatter(
         rows["num_jobs_2024"],
         rows["consensus_score"],
-        s=(rows["bubble"] * 14) ** 2 / 16,
+        s=rows["bubble_area"],
         c=rows["disagreement"],
         cmap=cmap,
         norm=norm,
@@ -111,13 +115,16 @@ def build_workforce_frontier(df: pd.DataFrame) -> None:
         linewidths=1.0,
     )
 
-    labels = rows.nlargest(12, "impact")
+    labels = rows.nlargest(8, "impact")
+    right_label_threshold = rows["num_jobs_2024"].quantile(0.82)
     for _, row in labels.iterrows():
+        on_right_edge = row["num_jobs_2024"] >= right_label_threshold
         ax.annotate(
             row["title"],
             (row["num_jobs_2024"], row["consensus_score"]),
-            xytext=(7, 7),
+            xytext=(-8, 6) if on_right_edge else (7, 7),
             textcoords="offset points",
+            ha="right" if on_right_edge else "left",
             fontsize=9,
             color=TEXT,
         )
